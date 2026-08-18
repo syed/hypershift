@@ -7,6 +7,7 @@ import (
 	hyperv1 "github.com/openshift/hypershift/api/hypershift/v1beta1"
 	azureutil "github.com/openshift/hypershift/support/azureutil"
 	"github.com/openshift/hypershift/support/config"
+	"github.com/openshift/hypershift/support/serviceutil"
 
 	routev1 "github.com/openshift/api/route/v1"
 
@@ -27,7 +28,7 @@ var (
 	}
 )
 
-func ReconcileService(svc *corev1.Service, ownerRef config.OwnerRef, strategy *hyperv1.ServicePublishingStrategy, platformType hyperv1.PlatformType, isPrivate bool) error {
+func ReconcileService(svc *corev1.Service, ownerRef config.OwnerRef, strategy *hyperv1.ServicePublishingStrategy, platformType hyperv1.PlatformType, isPrivate bool, trafficDistribution string) error {
 	ownerRef.ApplyTo(svc)
 	if svc.Spec.Selector == nil {
 		svc.Spec.Selector = oauthServerLabels
@@ -80,6 +81,7 @@ func ReconcileService(svc *corev1.Service, ownerRef config.OwnerRef, strategy *h
 		return fmt.Errorf("invalid publishing strategy for OAuth service: %s", strategy.Type)
 	}
 	svc.Spec.Ports[0] = portSpec
+	serviceutil.ApplyTrafficDistribution(svc, trafficDistribution)
 	return nil
 }
 

@@ -6,6 +6,7 @@ import (
 	hyperv1 "github.com/openshift/hypershift/api/hypershift/v1beta1"
 	component "github.com/openshift/hypershift/support/controlplane-component"
 	"github.com/openshift/hypershift/support/netutil"
+	"github.com/openshift/hypershift/support/serviceutil"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -27,6 +28,8 @@ func adaptService(cpContext component.WorkloadContext, svc *corev1.Service) erro
 	default:
 		return fmt.Errorf("invalid publishing strategy for Ignition service: %s", strategy.Type)
 	}
+
+	serviceutil.ApplyTrafficDistribution(svc, cpContext.HCP.Spec.Networking.TrafficDistribution)
 
 	return nil
 }

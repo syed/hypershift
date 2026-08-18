@@ -12,6 +12,7 @@ import (
 	"github.com/openshift/hypershift/support/events"
 	"github.com/openshift/hypershift/support/k8sutil"
 	"github.com/openshift/hypershift/support/netutil"
+	"github.com/openshift/hypershift/support/serviceutil"
 
 	routev1 "github.com/openshift/api/route/v1"
 
@@ -110,10 +111,12 @@ func ReconcileService(svc *corev1.Service, strategy *hyperv1.ServicePublishingSt
 	}
 	svc.Spec.Ports[0] = portSpec
 
+	serviceutil.ApplyTrafficDistribution(svc, hcp.Spec.Networking.TrafficDistribution)
+
 	return nil
 }
 
-func ReconcileServiceClusterIP(svc *corev1.Service, owner *metav1.OwnerReference) error {
+func ReconcileServiceClusterIP(svc *corev1.Service, owner *metav1.OwnerReference, trafficDistribution string) error {
 	k8sutil.EnsureOwnerRef(svc, owner)
 	if svc.Spec.Selector == nil {
 		svc.Spec.Selector = kasLabels()
@@ -142,6 +145,7 @@ func ReconcileServiceClusterIP(svc *corev1.Service, owner *metav1.OwnerReference
 	}
 	svc.Spec.Type = corev1.ServiceTypeClusterIP
 	svc.Spec.Ports[0] = portSpec
+	serviceutil.ApplyTrafficDistribution(svc, trafficDistribution)
 	return nil
 }
 
@@ -234,6 +238,7 @@ func ReconcilePrivateService(svc *corev1.Service, hcp *hyperv1.HostedControlPlan
 		svc.Annotations[AWSNLBAnnotation] = "nlb"
 	}
 	svc.Spec.Ports[0] = portSpec
+	serviceutil.ApplyTrafficDistribution(svc, hcp.Spec.Networking.TrafficDistribution)
 	return nil
 }
 
@@ -331,6 +336,7 @@ func ReconcileKonnectivityServerService(svc *corev1.Service, ownerRef config.Own
 		return fmt.Errorf("invalid publishing strategy for Konnectivity service: %s", strategy.Type)
 	}
 	svc.Spec.Ports[0] = portSpec
+	serviceutil.ApplyTrafficDistribution(svc, hcp.Spec.Networking.TrafficDistribution)
 	return nil
 }
 
