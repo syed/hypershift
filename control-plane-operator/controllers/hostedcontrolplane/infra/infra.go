@@ -238,7 +238,7 @@ func (r *Reconciler) reconcileAPIServerService(ctx context.Context, hcp *hyperv1
 		// Create the svc clusterIP for Azure on config.KASSVCPort as expected by internal consumers.
 		kasSVC := manifests.KubeAPIServerService(hcp.Namespace)
 		if _, err := createOrUpdate(ctx, r.Client, kasSVC, func() error {
-			return kas.ReconcileServiceClusterIP(kasSVC, p.OwnerReference)
+			return kas.ReconcileServiceClusterIP(kasSVC, p.OwnerReference, hcp.Spec.Networking.TrafficDistribution)
 		}); err != nil {
 			return fmt.Errorf("failed to reconcile KAS SVC clusterIP: %w", err)
 		}
@@ -343,7 +343,7 @@ func (r *Reconciler) reconcileOAuthServerService(ctx context.Context, hcp *hyper
 	p := oauth.NewOAuthServiceParams(hcp)
 	oauthServerService := manifests.OauthServerService(hcp.Namespace)
 	if _, err := createOrUpdate(ctx, r.Client, oauthServerService, func() error {
-		return oauth.ReconcileService(oauthServerService, p.OwnerRef, serviceStrategy, hcp.Spec.Platform.Type, netutil.IsPrivateHCP(hcp))
+		return oauth.ReconcileService(oauthServerService, p.OwnerRef, serviceStrategy, hcp.Spec.Platform.Type, netutil.IsPrivateHCP(hcp), hcp.Spec.Networking.TrafficDistribution)
 	}); err != nil {
 		return fmt.Errorf("failed to reconcile OAuth service: %w", err)
 	}

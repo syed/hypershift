@@ -7,6 +7,7 @@ import (
 	"github.com/openshift/hypershift/support/azureutil"
 	"github.com/openshift/hypershift/support/k8sutil"
 	"github.com/openshift/hypershift/support/netutil"
+	"github.com/openshift/hypershift/support/serviceutil"
 
 	routev1 "github.com/openshift/api/route/v1"
 
@@ -101,6 +102,8 @@ func ReconcileRouterService(svc *corev1.Service, internal, crossZoneLoadBalancin
 	if !internal && !azureutil.IsAroHCPByHCP(hcp) {
 		svc.Spec.LoadBalancerSourceRanges = allowedCIDRBlocks
 	}
+
+	serviceutil.ApplyTrafficDistribution(svc, hcp.Spec.Networking.TrafficDistribution)
 
 	return nil
 }

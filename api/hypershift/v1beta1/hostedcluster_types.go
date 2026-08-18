@@ -1257,6 +1257,17 @@ type ClusterNetworking struct {
 	// +optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="allocateNodeCIDRs is immutable and cannot be modified once set."
 	AllocateNodeCIDRs *AllocateNodeCIDRsMode `json:"allocateNodeCIDRs,omitempty"`
+
+	// trafficDistribution specifies the traffic distribution policy for hosted
+	// control plane services (kube-apiserver, oauth, konnectivity, ignition-server,
+	// metrics-proxy, and the private-router). When set to "PreferSameZone",
+	// kube-proxy on the management cluster will prefer same-AZ endpoints,
+	// reducing cross-AZ data transfer costs within the management cluster VPC.
+	// Valid values are "" (empty, no preference) and "PreferSameZone".
+	//
+	// +optional
+	// +kubebuilder:validation:Enum="";"PreferSameZone"
+	TrafficDistribution string `json:"trafficDistribution,omitempty"`
 }
 
 // MachineNetworkEntry is a single IP address block for node IP blocks.

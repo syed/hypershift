@@ -41,6 +41,7 @@ func NewComponent(defaultIngressDomain string) component.ControlPlaneComponent {
 		WithPredicate(endpointresolverv2.Predicate).
 		WithManifestAdapter(
 			"service.yaml",
+			component.WithAdaptFunction(adaptService),
 		).
 		WithManifestAdapter(
 			"scrape-config.yaml",
